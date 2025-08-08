@@ -31,22 +31,28 @@ class FolderDataset(torch.utils.data.Dataset):
 
         rel_path = self.images[idx]
         img_path = self.image_dir / rel_path
-        img = np.array(Image.open(str(img_path)))
+
+        # Load as PIL image to access .size (W, H)
+        img_pil = Image.open(str(img_path)).convert("RGB")
+        original_size = img_pil.size  # (W, H)
+
+        # Resize with PIL (if needed)
+        if self.resize is not None:
+            img_pil = img_pil.resize(self.resize, resample=Image.BILINEAR)
+
+        # Convert to numpy and tensor
+        img_np = np.array(img_pil)
 
         if self.normalize_t is not None:
-            img = self.normalize_t(img)
+            img_tensor = self.normalize_t(img_np)
         else:
-            # Default: divide by 255
-            img = TF.to_tensor(img)
-
-        if self.resize is not None:
-            img = TF.resize(img, self.resize[::-1])
-
+            img_tensor = TF.to_tensor(img_np)
 
         features = {
-            'image': img
+            'image': img_tensor,
+            'image_original': TF.to_tensor(img_pil),  # still resized, for overlay
+            'original_size': torch.tensor(original_size, dtype=torch.int32)  # (W, H)
         }
-
 
         metadata = {
             'image_name': img_path.name,
@@ -54,3 +60,4 @@ class FolderDataset(torch.utils.data.Dataset):
         }
 
         return features, metadata
+
