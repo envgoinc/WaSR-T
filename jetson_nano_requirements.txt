@@ -1,6 +1,6 @@
 torch
 torchvision
-pytorch-lightning==1.4.4
+pytorch-lightning==2.4.0
 torchmetrics==0.5.0
 tqdm
 albumentations
