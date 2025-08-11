@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # Virtual envs
-venv/
+.venv/
 
 # Project specific
 /output/
